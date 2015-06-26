@@ -10,8 +10,6 @@
 // @_nclude     http*://*wanikani.com/lesson/session
 // @version     1.2
 // @grant       GM_xmlhttpRequest
-// @grant       GM_getValue
-// @grant       GM_setValue
 // @grant       GM_registerMenuCommand
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js
 // ==/UserScript==
@@ -33,7 +31,7 @@ $ = unsafeWindow.$;
 var Pnum = Object.freeze({ unknown:0, kanji:1, reviews:2, lessons:3 });
 var thisPage = Pnum.unknown;
 
-var API = GM_getValue("api", "https://wk-similar-kanji.herokuapp.com/kanji");
+var API = localStorage.getItem("WKSimilarKanjiAPIUrl") || "https://wk-similar-kanji.herokuapp.com/kanji";
 
 var WKTopicUrl = "https://www.wanikani.com/chat/api-and-third-party-apps/9109";
 var uniqueMessage = "<p>This is a unique kanji that has no similars.</p> \
@@ -42,12 +40,43 @@ var errorMessage = "<p>Something unexpected happened while trying to load simila
           <p>API url: " + API + "</p>\
           </><p>If this bothers you, please drop a line <a href='" + WKTopicUrl + "'>here</a>!</p>"
 
-GM_registerMenuCommand("WaniKani Similar Kanji: Manually enter API url", setAPIurl, null, null, "R");
+var showRadicalSpecific = localStorage.getItem("WKSimilarKanjiHideRadicalSpecific") != "false";
+var showUserSpecific = localStorage.getItem("WKSimilarKanjiHideUserSpecific") != "false";
 
-function setAPIurl(){
-  var apiUrl = prompt("Enter API url for WaniKani Similar Kanji:");
-  if(apiUrl){
-    GM_setValue("api", apiUrl);
+
+function GMsetup() {
+  if (GM_registerMenuCommand) {
+    GM_registerMenuCommand("WaniKani Similar Kanji: Manually enter API url", function(){
+      var apiUrl = prompt("Enter API url for WaniKani Similar Kanji:");
+      if(apiUrl){
+        localStorage.setItem("WKSimilarKanjiAPIUrl", apiUrl);
+      }
+      location.reload();
+    });
+
+    if (showUserSpecific) {
+      GM_registerMenuCommand("WaniKani Similar Kanji: hide user specific kanji", function(){
+        localStorage.setItem("WKSimilarKanjiHideUserSpecific", 'false');
+        location.reload();
+      });
+    } else {
+      GM_registerMenuCommand("WaniKani Similar Kanji: show user specific kanji", function(){
+        localStorage.setItem("WKSimilarKanjiHideUserSpecific", 'true');
+        location.reload();
+      });
+    }
+
+    if (showRadicalSpecific) {
+      GM_registerMenuCommand("WaniKani Similar Kanji: hide radical specific kanji", function(){
+        localStorage.setItem("WKSimilarKanjiHideRadicalSpecific", 'false');
+        location.reload();
+      });
+    } else {
+      GM_registerMenuCommand("WaniKani Similar Kanji: show radical specific kanji", function(){
+        localStorage.setItem("WKSimilarKanjiHideRadicalSpecific", 'true');
+        location.reload();
+      });
+    }
   }
 }
 
@@ -55,6 +84,11 @@ function setAPIurl(){
  * Main
  */
 window.addEventListener("load", function (e) {
+  GMsetup();
+
+  if (!showRadicalSpecific && !showUserSpecific) {
+    return;
+  }
 
   // Determine page type
   if (/\/kanji\/./.test(document.URL)) {
@@ -154,7 +188,6 @@ function createSimilarKanjiSection() {
   return $('#similar_kanji');
 }
 
-
 /*
  * Adds the similarKanjiContainer section element to the appropriate location
  */
@@ -171,23 +204,41 @@ function loadDiagram() {
       url: API + "/" + getKanji(),
       onload: function(xhr) {
         var similarKanjiContainer = unsafeWindow.similarKanjiContainer;
-        if (xhr.status == 200) {
-          if (similar = JSON.parse(xhr.responseText).similar) {
-              if (similar.length > 0) {
 
+        if (xhr.status == 200) {
+          var response = JSON.parse(xhr.responseText);
+          if ((similar = response.similar) && (user_similar = response.user_similar) ) {
+              if ((similar + user_similar).length > 0) {
                 var similatKanjiList = "";
 
-                for (var i=0; i<similar.length; ++i ) {
+                if (showRadicalSpecific) {
+                  for (var i=0; i<similar.length; ++i ) {
 
-                  similatKanjiList += "<li class='character-item' id='kanji-custom-" + i + "'> \
-                    <span lang='ja' class='item-badge'></span> \
-                    <a href='/kanji/" + similar[i].character + "'> \
-                      <span class='character' lang='ja'>" + similar[i].character + "</span> \
-                        <ul> \
-                          <li>" + similar[i].meaning + "</li> \
-                        </ul> \
-                    </a> \
-                  </li>";
+                    similatKanjiList += "<li class='character-item' id='kanji-custom-" + i + "'> \
+                      <span lang='ja' class='item-badge'></span> \
+                      <a href='/kanji/" + similar[i].character + "'> \
+                        <span class='character' lang='ja'>" + similar[i].character + "</span> \
+                          <ul> \
+                            <li>" + similar[i].meaning + "</li> \
+                          </ul> \
+                      </a> \
+                    </li>";
+                  }
+                }
+
+                if (localStorage.getItem("WKSimilarKanjiHideUserSpecific") != "false") {
+                  for (var i=0; i<user_similar.length; ++i ) {
+
+                    similatKanjiList += "<li class='locked character-item' id='kanji-custom-" + i + "'> \
+                      <span lang='ja' class='item-badge'></span> \
+                      <a href='/kanji/" + user_similar[i].character + "'> \
+                        <span class='character' lang='ja'>" + user_similar[i].character + "</span> \
+                          <ul> \
+                            <li>" + user_similar[i].meaning + "</li> \
+                          </ul> \
+                      </a> \
+                    </li>";
+                  }
                 }
 
                 similarKanjiContainer.html("<ul class='single-character-grid multi-character-grid-extra-styling-767px'>" + similatKanjiList + "</ul>");
@@ -197,7 +248,6 @@ function loadDiagram() {
             return;
           }
         }
-
         unsafeWindow.similarKanjiContainer.html(errorMessage);
       },
       onerror: function(xhr) {
