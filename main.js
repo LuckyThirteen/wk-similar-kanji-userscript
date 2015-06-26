@@ -8,7 +8,7 @@
 // @include     http*://*wanikani.com/level/*/kanji/*
 // @_nclude     http*://*wanikani.com/review/session
 // @_nclude     http*://*wanikani.com/lesson/session
-// @version     1.1
+// @version     1.2
 // @grant       GM_xmlhttpRequest
 // @grant       GM_getValue
 // @grant       GM_setValue
