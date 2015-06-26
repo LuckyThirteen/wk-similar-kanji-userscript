@@ -10,6 +10,9 @@
 // @_nclude     http*://*wanikani.com/lesson/session
 // @version     1.1
 // @grant       GM_xmlhttpRequest
+// @grant       GM_getValue
+// @grant       GM_setValue
+// @grant       GM_registerMenuCommand
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js
 // ==/UserScript==
 
@@ -30,13 +33,23 @@ $ = unsafeWindow.$;
 var Pnum = Object.freeze({ unknown:0, kanji:1, reviews:2, lessons:3 });
 var thisPage = Pnum.unknown;
 
-var API = "https://wk-similar-kanji.herokuapp.com/kanji";
+var API = GM_getValue("api", "https://wk-similar-kanji.herokuapp.com/kanji");
 
 var WKTopicUrl = "https://www.wanikani.com/chat/api-and-third-party-apps/9109";
 var uniqueMessage = "<p>This is a unique kanji that has no similars.</p> \
           <p>Having doubts? Shout them <a href='" + WKTopicUrl + "'>here</a>!</p>"
 var errorMessage = "<p>Something unexpected happened while trying to load similar kanji. ごめんなさい。\
+          <p>API url: " + API + "</p>\
           </><p>If this bothers you, please drop a line <a href='" + WKTopicUrl + "'>here</a>!</p>"
+
+GM_registerMenuCommand("WaniKani Similar Kanji: Manually enter API url", setAPIurl, null, null, "R");
+
+function setAPIurl(){
+  var apiUrl = prompt("Enter API url for WaniKani Similar Kanji:");
+  if(apiUrl){
+    GM_setValue("api", apiUrl);
+  }
+}
 
 /*
  * Main
