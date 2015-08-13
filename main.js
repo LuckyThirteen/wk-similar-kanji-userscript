@@ -8,7 +8,7 @@
 // @include     http*://*wanikani.com/level/*/kanji/*
 // @_nclude     http*://*wanikani.com/review/session
 // @_nclude     http*://*wanikani.com/lesson/session
-// @version     1.3
+// @version     1.4
 // @grant       GM_xmlhttpRequest
 // @grant       GM_registerMenuCommand
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js

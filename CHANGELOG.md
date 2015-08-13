@@ -1,3 +1,6 @@
+# 1.4
+* [Change default API url.](http://github.com/luckythirteen/wk-similar-kanji-userscript/commit/836e60705eaa30c1a6a9fcc1b4c6d870cddd772a)
+
 # 1.3
 * [Add community specific similar kanji.](http://github.com/luckythirteen/wk-similar-kanji-userscript/commit/b3c785434f92bfddfe40c885709952c558dc6c01)
 
