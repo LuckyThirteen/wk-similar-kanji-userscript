@@ -31,7 +31,7 @@ $ = unsafeWindow.$;
 var Pnum = Object.freeze({ unknown:0, kanji:1, reviews:2, lessons:3 });
 var thisPage = Pnum.unknown;
 
-var API = localStorage.getItem("WKSimilarKanjiAPIUrl") || "https://wk-similar-kanji.herokuapp.com/kanji";
+var API = localStorage.getItem("WKSimilarKanjiAPIUrl") || "http://wk-similarkanji.rhcloud.com/kanji";
 
 var WKTopicUrl = "https://www.wanikani.com/chat/api-and-third-party-apps/9109";
 var uniqueMessage = "<p>This is a unique kanji that has no similars.</p> \
