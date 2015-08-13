@@ -4,7 +4,7 @@ The visibility can be toggled for both grups.
 
 ---
 
-![in action](https://greasyfork.org/system/screenshots/screenshots/000/001/264/original/wk_cow.png?1435338001)
+![in action](https://greasyfork.org/system/screenshots/screenshots/000/001/527/original/wk_breath.png?1438100966)
 
 ---
 
